@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DebSoc Dare Wheel – Freshers Tournament</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --y: #E8B84B;
+    --yd: #b8882b;
+    --yg: rgba(232,184,75,0.10);
+    --yb: rgba(232,184,75,0.22);
+    --bg: #0e0e0e;
+    --s1: #171717;
+    --txt: #ffffff;
+    --mut: #666;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%; overflow: hidden;
+    background: var(--bg); color: var(--txt);
+    font-family: 'DM Sans', sans-serif;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(232,184,75,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,184,75,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+
+  .shell {
+    position: relative; z-index: 1;
+    height: 100vh;
+    display: grid;
+    grid-template-rows: 52px 1fr 40px;
+  }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 32px;
+    border-bottom: 1px solid rgba(232,184,75,0.1);
+  }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--y); letter-spacing: 0.08em; }
+  .topcenter {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 17px; letter-spacing: 0.13em;
+    color: rgba(232,184,75,0.4); text-transform: uppercase;
+  }
+  .topright { width: 80px; }
+
+  .stage { position: relative; overflow: hidden; }
+
+  /* WHEEL VIEW */
+  .wheel-view {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 24px;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .wheel-view.hidden { opacity: 0; transform: scale(0.88); pointer-events: none; }
+
+  .wheel-wrap { position: relative; }
+  .pointer-wrap {
+    position: absolute; top: -10px; left: 50%;
+    transform: translateX(-50%); z-index: 10;
+  }
+  #wheelCanvas {
+    display: block; border-radius: 50%;
+    border: 4px solid var(--y);
+    box-shadow: 0 0 0 8px #171717, 0 0 0 10px var(--y), 0 0 60px rgba(232,184,75,0.12);
+  }
+  .spin-btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px; letter-spacing: 0.1em;
+    background: var(--y); color: var(--bg);
+    border: none; padding: 13px 64px; border-radius: 7px;
+    cursor: pointer; box-shadow: 0 5px 0 var(--yd);
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .spin-btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 var(--yd); }
+  .spin-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--yd); }
+  .spin-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* RESULT VIEW */
+  .result-view {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    gap: 28px; padding: 24px 40px;
+    opacity: 0; transform: scale(1.06);
+    pointer-events: none;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .result-view.visible { opacity: 1; transform: scale(1); pointer-events: all; }
+
+  .dare-panel {
+    flex: 1; max-width: 520px; height: 100%;
+    background: var(--s1);
+    border: 1.5px solid var(--yb);
+    border-radius: 16px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 36px 32px;
+    position: relative; overflow: hidden;
+  }
+  .dare-panel::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(232,184,75,0.07) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .dare-eyebrow {
+    font-size: 10px; font-weight: 600; color: var(--y);
+    letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .dare-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(28px, 3.5vw, 44px);
+    letter-spacing: 0.03em; color: #fff;
+    line-height: 1.2; margin-bottom: 20px;
+  }
+  .reward-pill {
+    background: var(--yg); border: 1px solid var(--yb);
+    color: var(--y); font-size: 13px; font-weight: 500;
+    padding: 7px 22px; border-radius: 100px;
+    margin-bottom: 28px;
+  }
+  .spin-again-btn {
+    background: transparent; color: var(--y);
+    border: 1px solid rgba(232,184,75,0.35);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    padding: 8px 26px; border-radius: 7px;
+    cursor: pointer; transition: background 0.15s, color 0.15s;
+  }
+  .spin-again-btn:hover { background: var(--y); color: var(--bg); }
+
+  .qr-panel {
+    width: 260px; height: 100%;
+    background: var(--s1);
+    border: 1.5px solid var(--yb);
+    border-radius: 16px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 28px 24px;
+    gap: 12px; flex-shrink: 0;
+    position: relative; overflow: hidden;
+  }
+  .qr-panel::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 100%, rgba(232,184,75,0.07) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .qr-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px; letter-spacing: 0.06em; color: var(--y);
+  }
+  .qr-sub { font-size: 11px; color: var(--mut); line-height: 1.6; }
+  .qr-box {
+    background: #fff; padding: 10px; border-radius: 10px;
+    line-height: 0; box-shadow: 0 0 0 5px rgba(232,184,75,0.12);
+  }
+  .qr-divider { font-size: 11px; color: var(--mut); }
+  .reg-btn {
+    display: block; width: 100%;
+    background: var(--y); color: var(--bg);
+    font-weight: 600; font-size: 13px;
+    padding: 11px 0; border-radius: 7px;
+    text-decoration: none; text-align: center;
+    box-shadow: 0 4px 0 var(--yd);
+    transition: opacity 0.12s, transform 0.12s;
+  }
+  .reg-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .insta-btn {
+    display: block; width: 100%;
+    background: transparent; color: var(--y);
+    border: 1px solid rgba(232,184,75,0.35);
+    font-weight: 600; font-size: 13px;
+    padding: 9px 0; border-radius: 7px;
+    text-decoration: none; text-align: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .insta-btn:hover { background: var(--y); color: var(--bg); }
+
+  .bottombar {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; border-top: 1px solid rgba(232,184,75,0.08);
+  }
+  .bottombar span { font-size: 11px; color: var(--mut); }
+  .bottombar .dot { color: rgba(232,184,75,0.2); }
+  .bottombar .hl { color: var(--y); font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="topbar">
+    <div class="logo">DebSoc</div>
+    <div class="topcenter">Freshers Tournament 2025</div>
+    <div class="topright"></div>
+  </div>
+
+  <div class="stage">
+
+    <!-- WHEEL VIEW -->
+    <div class="wheel-view" id="wheelView">
+      <div class="wheel-wrap">
+        <div class="pointer-wrap">
+          <svg width="28" height="32" viewBox="0 0 28 32">
+            <polygon points="14,2 26,28 2,28" fill="#E8B84B" stroke="#0e0e0e" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <canvas id="wheelCanvas"></canvas>
+      </div>
+      <button class="spin-btn" id="spinBtn" onclick="spin()">Spin the wheel</button>
+    </div>
+
+    <!-- RESULT VIEW -->
+    <div class="result-view" id="resultView">
+      <div class="dare-panel">
+        <div class="dare-eyebrow">Your dare</div>
+        <div class="dare-text" id="dareText"></div>
+        <div class="reward-pill" id="rewardText"></div>
+        <button class="spin-again-btn" onclick="goBack()">Spin again</button>
+      </div>
+      <div class="qr-panel">
+        <div class="qr-title">Register for FT</div>
+        <div class="qr-sub">Free to enter — bring a team!</div>
+        <div class="qr-box"><div id="qrcode"></div></div>
+        <div class="qr-divider">— also find us on —</div>
+        <a class="insta-btn" href="https://www.instagram.com/msrit.debsoc" target="_blank" rel="noopener">@msrit.debsoc</a>
+        <div class="qr-divider">— or register directly —</div>
+        <a class="reg-btn" href="https://docs.google.com/forms/d/e/1FAIpQLScF41TYmzO5zgZZ4Tf-cEvISi3hn5FHnOGjzvSM-v0txQn1FQ/viewform" target="_blank" rel="noopener">Register now →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottombar">
+    <span class="hl">DebSoc</span>
+    <span class="dot">·</span>
+    <span>@msrit.debsoc</span>
+    <span class="dot">·</span>
+    <span>Spin. Dare. Win chocolate.</span>
+  </div>
+
+</div>
+
+<script>
+const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScF41TYmzO5zgZZ4Tf-cEvISi3hn5FHnOGjzvSM-v0txQn1FQ/viewform";
+const INSTA_URL = "https://www.instagram.com/msrit.debsoc";
+
+const dares = [
+  { short: "Register Now!",  text: "Register for the Freshers Tournament on the spot — with a full team. Right now!", reward: "Register = chocolate for every team member" },
+  { short: "Story Dare",     text: "Post a story urging your followers to register for FT. Tag @msrit.debsoc!", reward: "Show us the story = chocolate" },
+  { short: "Bring a Friend", text: "Call or text a friend and get them to register for FT while you stand right here.", reward: "They register = chocolate for both of you" },
+  { short: "Recruit a Team", text: "Find 2 people nearby and convince them to register as a team — right now!", reward: "They sign up = chocolate for all three" },
+  { short: "Follow Us",      text: "Follow @msrit.debsoc on Instagram right now and share our page to your story!", reward: "Show us = chocolate on the spot" },
+  { short: "Hype DebSoc",    text: "Post a story about why debate is worth trying and tag @msrit.debsoc. Sell the club!", reward: "Post it = chocolate + you might just convince someone" },
+  { short: "Double Dare",    text: "Register for the tournament AND post a story hyping up DebSoc. Both. Right now.", reward: "Do both = double chocolate" },
+  { short: "Free Pass!",     text: "Lucky you — free pass! But follow @msrit.debsoc on Instagram before you leave.", reward: "Follow us = collect your chocolate" },
+];
+
+const COLORS      = ["#E8B84B","#171717","#E8B84B","#171717","#E8B84B","#171717","#E8B84B","#171717"];
+const TEXT_COLORS = ["#0e0e0e","#E8B84B","#0e0e0e","#E8B84B","#0e0e0e","#E8B84B","#0e0e0e","#E8B84B"];
+
+const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+const n = dares.length;
+const arc = (2 * Math.PI) / n;
+let totalRotation = 0, spinning = false, qrGenerated = false;
+
+// Size wheel based on available space
+function getWheelSize() {
+  const stage = document.querySelector('.stage');
+  const h = stage.clientHeight - 100; // room for button
+  const w = stage.clientWidth - 80;
+  const size = Math.min(h, w, 420);
+  return Math.max(size, 260);
+}
+
+function initCanvas() {
+  const size = getWheelSize();
+  canvas.width = size;
+  canvas.height = size;
+  // high-DPI sharpness
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  ctx.scale(dpr, dpr);
+  drawWheel(totalRotation);
+}
+
+function drawWheel(rot) {
+  const size = parseInt(canvas.style.width);
+  ctx.clearRect(0, 0, size, size);
+  const cx = size / 2, cy = size / 2, r = size / 2 - 4;
+
+  for (let i = 0; i < n; i++) {
+    const s = rot + i * arc, e = s + arc;
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, s, e); ctx.closePath();
+    ctx.fillStyle = COLORS[i]; ctx.fill();
+    ctx.strokeStyle = '#E8B84B'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    // crisp text
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(s + arc / 2);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = TEXT_COLORS[i];
+    // scale font with wheel size
+    const fs = Math.max(10, Math.round(size * 0.033));
+    ctx.font = `600 ${fs}px 'DM Sans', sans-serif`;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(dares[i].short, r - Math.round(size * 0.04), 0);
+    ctx.restore();
+  }
+
+  // hub
+  const hub = size * 0.06;
+  ctx.beginPath(); ctx.arc(cx, cy, hub, 0, 2 * Math.PI);
+  ctx.fillStyle = '#E8B84B'; ctx.fill();
+  ctx.strokeStyle = '#0e0e0e'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx, cy, hub * 0.3, 0, 2 * Math.PI);
+  ctx.fillStyle = '#0e0e0e'; ctx.fill();
+}
+
+window.addEventListener('load', initCanvas);
+window.addEventListener('resize', initCanvas);
+
+function spin() {
+  if (spinning) return;
+  spinning = true;
+  document.getElementById('spinBtn').disabled = true;
+
+  const target = totalRotation + (6 + Math.floor(Math.random() * 5)) * 2 * Math.PI + Math.random() * 2 * Math.PI;
+  const duration = 4200, t0 = performance.now(), r0 = totalRotation;
+  const ease = t => 1 - Math.pow(1 - t, 4);
+
+  (function animate(now) {
+    const p = Math.min((now - t0) / duration, 1);
+    drawWheel(r0 + (target - r0) * ease(p));
+    if (p < 1) { requestAnimationFrame(animate); return; }
+    totalRotation = target % (2 * Math.PI);
+    spinning = false;
+    showResult(target);
+  })(performance.now());
+}
+
+function showResult(finalRot) {
+  const norm = ((finalRot % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+  const adj  = ((3*Math.PI/2 - norm) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI);
+  const dare = dares[Math.floor(adj / arc) % n];
+
+  document.getElementById('dareText').textContent = dare.text;
+  document.getElementById('rewardText').textContent = dare.reward;
+
+  if (!qrGenerated) {
+    new QRCode(document.getElementById('qrcode'), {
+      text: FORM_URL, width: 160, height: 160,
+      colorDark: "#0e0e0e", colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+    qrGenerated = true;
+  }
+
+  document.getElementById('wheelView').classList.add('hidden');
+  document.getElementById('resultView').classList.add('visible');
+}
+
+function goBack() {
+  document.getElementById('resultView').classList.remove('visible');
+  document.getElementById('wheelView').classList.remove('hidden');
+  document.getElementById('spinBtn').disabled = false;
+}
+</script>
+</body>
+</html>
