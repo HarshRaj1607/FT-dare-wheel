@@ -39,7 +39,6 @@
     grid-template-rows: 52px 1fr 40px;
   }
 
-  /* ── TOP BAR ── */
   .topbar {
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 32px;
@@ -55,17 +54,15 @@
   }
   .topright { width: 80px; }
 
-  /* ── STAGE ── */
   .stage { position: relative; }
 
-  /* ── WHEEL VIEW ── */
+  /* WHEEL VIEW */
   .wheel-view {
     position: absolute; inset: 0;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     gap: 24px; padding: 20px;
     transition: opacity 0.5s ease, transform 0.5s ease;
-    /* make stage height work on desktop */
     min-height: calc(100vh - 92px);
   }
   .wheel-view.hidden { opacity: 0; transform: scale(0.88); pointer-events: none; }
@@ -93,24 +90,30 @@
   .spin-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--yd); }
   .spin-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
 
-  /* ── RESULT VIEW ── */
+  /* RESULT VIEW */
   .result-view {
-    /* hidden by default */
     display: none;
     opacity: 0;
     transform: scale(1.04);
     transition: opacity 0.5s ease, transform 0.5s ease;
-    /* DESKTOP: side by side, fills stage height */
     position: absolute; inset: 0;
     flex-direction: row;
     align-items: stretch;
     gap: 24px; padding: 20px 36px;
   }
-  .result-view.visible {
-    opacity: 1; transform: scale(1); pointer-events: all;
-  }
+  .result-view.visible { opacity: 1; transform: scale(1); pointer-events: all; }
 
-  /* ── PANELS ── */
+  /* dare tag pill */
+  .dare-tag {
+    font-size: 9px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    padding: 3px 12px; border-radius: 100px;
+    margin-bottom: 12px; display: inline-block;
+  }
+  .dare-tag.reg  { background: rgba(72,199,142,0.12); color: #48c78e; border: 1px solid rgba(72,199,142,0.3); }
+  .dare-tag.soc  { background: rgba(232,184,75,0.12); color: var(--y); border: 1px solid rgba(232,184,75,0.3); }
+  .dare-tag.fun  { background: rgba(255,107,107,0.12); color: #ff6b6b; border: 1px solid rgba(255,107,107,0.3); }
+
   .dare-panel {
     flex: 1;
     background: var(--s1);
@@ -129,7 +132,7 @@
   .dare-eyebrow {
     font-size: 10px; font-weight: 600; color: var(--y);
     letter-spacing: 0.2em; text-transform: uppercase;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
   }
   .dare-text {
     font-family: 'Bebas Neue', sans-serif;
@@ -169,10 +172,7 @@
     background: radial-gradient(ellipse at 50% 100%, rgba(232,184,75,0.07) 0%, transparent 60%);
     pointer-events: none;
   }
-  .qr-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px; letter-spacing: 0.06em; color: var(--y);
-  }
+  .qr-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.06em; color: var(--y); }
   .qr-sub { font-size: 11px; color: var(--mut); line-height: 1.6; }
   .qr-box {
     background: #fff; padding: 10px; border-radius: 10px;
@@ -200,7 +200,6 @@
   }
   .insta-btn:hover { background: var(--y); color: var(--bg); }
 
-  /* ── BOTTOM BAR ── */
   .bottombar {
     display: flex; align-items: center; justify-content: center;
     gap: 8px; border-top: 1px solid rgba(232,184,75,0.08);
@@ -210,47 +209,23 @@
   .bottombar .dot { color: rgba(232,184,75,0.2); }
   .bottombar .hl { color: var(--y); font-weight: 500; }
 
-  /* ════════════════════════════════
-     MOBILE  (≤ 700px)
-     ════════════════════════════════ */
+  /* ── MOBILE ── */
   @media (max-width: 700px) {
     .topcenter { font-size: 12px; letter-spacing: 0.08em; }
     .topright { display: none; }
     .topbar { padding: 0 16px; }
-
-    /* wheel: tighter on mobile */
-    .wheel-view {
-      gap: 18px; padding: 16px;
-      min-height: calc(100vh - 92px);
-    }
+    .wheel-view { gap: 18px; padding: 16px; min-height: calc(100vh - 92px); }
     .spin-btn { font-size: 18px; padding: 11px 40px; }
-
-    /* result: break out of absolute, become normal flow + scrollable */
     .result-view {
-      position: relative !important;
-      inset: auto !important;
+      position: relative !important; inset: auto !important;
       flex-direction: column !important;
       align-items: stretch !important;
-      gap: 16px !important;
-      padding: 16px !important;
+      gap: 16px !important; padding: 16px !important;
       overflow-y: auto;
     }
-
-    /* dare panel: no fixed height, auto */
-    .dare-panel {
-      padding: 28px 20px;
-      min-height: 0;
-    }
+    .dare-panel { padding: 28px 20px; min-height: 0; }
     .dare-text { font-size: 26px; }
-
-    /* qr panel: full width, auto height */
-    .qr-panel {
-      width: 100% !important;
-      padding: 24px 20px;
-      min-height: 0;
-    }
-
-    /* push result below the wheel view space */
+    .qr-panel { width: 100% !important; padding: 24px 20px; min-height: 0; }
     .stage { min-height: calc(100vh - 92px); }
   }
 </style>
@@ -283,6 +258,7 @@
     <div class="result-view" id="resultView">
       <div class="dare-panel">
         <div class="dare-eyebrow">Your dare</div>
+        <div class="dare-tag" id="dareTag"></div>
         <div class="dare-text" id="dareText"></div>
         <div class="reward-pill" id="rewardText"></div>
         <button class="spin-again-btn" onclick="goBack()">Spin again</button>
@@ -311,18 +287,19 @@
 </div>
 
 <script>
-const FORM_URL  = "https://docs.google.com/forms/d/e/1FAIpQLScF41TYmzO5zgZZ4Tf-cEvISi3hn5FHnOGjzvSM-v0txQn1FQ/viewform";
-const isMobile  = () => window.innerWidth <= 700;
+const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScF41TYmzO5zgZZ4Tf-cEvISi3hn5FHnOGjzvSM-v0txQn1FQ/viewform";
+const isMobile = () => window.innerWidth <= 700;
 
+// type: 'reg' | 'soc' | 'fun'
 const dares = [
-  { short: "Register Now!",  text: "Register for the Freshers Tournament on the spot — with a full team. Right now!", reward: "Register = chocolate for every team member" },
-  { short: "Story Dare",     text: "Post a story urging your followers to register for FT. Tag @msrit.debsoc!", reward: "Show us the story = chocolate" },
-  { short: "Bring a Friend", text: "Call or text a friend and get them to register for FT while you stand right here.", reward: "They register = chocolate for both of you" },
-  { short: "Recruit a Team", text: "Find 2 people nearby and convince them to register as a team — right now!", reward: "They sign up = chocolate for all three" },
-  { short: "Follow Us",      text: "Follow @msrit.debsoc on Instagram right now and share our page to your story!", reward: "Show us = chocolate on the spot" },
-  { short: "Hype DebSoc",    text: "Post a story about why debate is worth trying and tag @msrit.debsoc. Sell the club!", reward: "Post it = chocolate + you might just convince someone" },
-  { short: "Double Dare",    text: "Register for the tournament AND post a story hyping up DebSoc. Both. Right now.", reward: "Do both = double chocolate" },
-  { short: "Free Pass!",     text: "Lucky you — free pass! But follow @msrit.debsoc on Instagram before you leave.", reward: "Follow us = collect your chocolate" },
+  { short: "Register Now!",  type: "reg", label: "Registration",  text: "Register for the Freshers Tournament on the spot — with a full team. Right now!", reward: "Register = chocolate for every team member" },
+  { short: "Story Dare",     type: "reg", label: "Registration",  text: "Post a story urging your followers to register for FT. Tag @msrit.debsoc!", reward: "Show us the story = chocolate" },
+  { short: "Bring a Friend", type: "reg", label: "Registration",  text: "Call or text a friend and get them to register for FT while you stand right here.", reward: "They register = chocolate for both of you" },
+  { short: "Follow Us",      type: "soc", label: "Soc Promo",     text: "Follow @msrit.debsoc on Instagram right now and share our page to your story!", reward: "Show us = chocolate on the spot" },
+  { short: "Hype DebSoc",    type: "soc", label: "Soc Promo",     text: "Post a story about why debate is worth trying and tag @msrit.debsoc. Sell the club!", reward: "Post it = chocolate + bragging rights" },
+  { short: "10 Push-ups",    type: "fun", label: "Just for fun",  text: "10 push-ups. Right here, right now. The crowd counts — no cheating!", reward: "Finish them = chocolate" },
+  { short: "Prank Call",     type: "fun", label: "Just for fun",  text: "Call a friend and tell them you just won a national debate championship. Keep a straight face.", reward: "Keep it going for 30 sec = chocolate" },
+  { short: "Impromptu!",     type: "fun", label: "Just for fun",  text: "We give you a wild topic. You speak for 30 seconds. The crowd decides if you win.", reward: "Crowd approves = chocolate" },
 ];
 
 const COLORS      = ["#E8B84B","#171717","#E8B84B","#171717","#E8B84B","#171717","#E8B84B","#171717"];
@@ -357,17 +334,14 @@ function drawWheel(rot) {
   const size = parseInt(canvas.style.width);
   ctx.clearRect(0, 0, size, size);
   const cx = size / 2, cy = size / 2, r = size / 2 - 4;
-
   for (let i = 0; i < n; i++) {
     const s = rot + i * arc, e = s + arc;
     ctx.beginPath(); ctx.moveTo(cx, cy);
     ctx.arc(cx, cy, r, s, e); ctx.closePath();
     ctx.fillStyle = COLORS[i]; ctx.fill();
     ctx.strokeStyle = '#E8B84B'; ctx.lineWidth = 1.5; ctx.stroke();
-
     ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(s + arc / 2);
+    ctx.translate(cx, cy); ctx.rotate(s + arc / 2);
     ctx.textAlign = 'right';
     ctx.fillStyle = TEXT_COLORS[i];
     const fs = Math.max(10, Math.round(size * 0.033));
@@ -376,7 +350,6 @@ function drawWheel(rot) {
     ctx.fillText(dares[i].short, r - Math.round(size * 0.04), 0);
     ctx.restore();
   }
-
   const hub = size * 0.06;
   ctx.beginPath(); ctx.arc(cx, cy, hub, 0, 2 * Math.PI);
   ctx.fillStyle = '#E8B84B'; ctx.fill();
@@ -392,11 +365,9 @@ function spin() {
   if (spinning) return;
   spinning = true;
   document.getElementById('spinBtn').disabled = true;
-
   const target = totalRotation + (6 + Math.floor(Math.random() * 5)) * 2 * Math.PI + Math.random() * 2 * Math.PI;
   const duration = 4200, t0 = performance.now(), r0 = totalRotation;
   const ease = t => 1 - Math.pow(1 - t, 4);
-
   (function animate(now) {
     const p = Math.min((now - t0) / duration, 1);
     drawWheel(r0 + (target - r0) * ease(p));
@@ -415,6 +386,10 @@ function showResult(finalRot) {
   document.getElementById('dareText').textContent = dare.text;
   document.getElementById('rewardText').textContent = dare.reward;
 
+  const tag = document.getElementById('dareTag');
+  tag.textContent = dare.label;
+  tag.className = 'dare-tag ' + dare.type;
+
   if (!qrGenerated) {
     const qrSize = isMobile() ? 140 : 160;
     new QRCode(document.getElementById('qrcode'), {
@@ -429,12 +404,9 @@ function showResult(finalRot) {
   const wv = document.getElementById('wheelView');
 
   if (isMobile()) {
-    // on mobile: hide wheel, show result as normal-flow scrollable block
     wv.style.display = 'none';
     rv.style.display = 'flex';
-    // scroll to top of page so dare is visible
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // trigger fade
     requestAnimationFrame(() => rv.classList.add('visible'));
   } else {
     wv.classList.add('hidden');
